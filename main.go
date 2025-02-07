@@ -5,8 +5,8 @@ import (
 
 	"github.com/jodraarmiza/backend/auth"
 	"github.com/jodraarmiza/backend/database"
-	"github.com/jodraarmiza/backend/handlers" // ✅ Pastikan handler digunakan
-	"github.com/jodraarmiza/backend/models"   // ✅ Gunakan model untuk migrasi
+	"github.com/jodraarmiza/backend/handlers"
+	"github.com/jodraarmiza/backend/models"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -18,11 +18,12 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// ✅ CORS agar bisa diakses dari jaringan (localhost & network 192.168.1.36)
+	// ✅ CORS Config agar frontend bisa akses backend
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173", "https://192.168.1.36:5173"},
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowOrigins:     []string{"http://localhost:5173", "http://192.168.1.36:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowCredentials: true,
 	}))
 
 	// ✅ Koneksi ke Database
@@ -34,11 +35,12 @@ func main() {
 	}
 
 	// ✅ Routes
-	e.POST("/register", auth.Register)
+	e.POST("/register", auth.Register) // Pastikan ini ada
 	e.POST("/login", auth.Login)
 	e.GET("/todos", handlers.GetToDos)
 	e.POST("/todos", handlers.CreateToDo)
 
-	// ✅ Jalankan server di semua network
+	// ✅ Jalankan server
+	log.Println("✅ Server berjalan di: http://192.168.1.36:8080")
 	e.Logger.Fatal(e.Start("0.0.0.0:8080")) // Bisa diakses dari jaringan
 }

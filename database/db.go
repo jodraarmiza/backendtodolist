@@ -31,12 +31,14 @@ func ConnectDB() {
 		log.Fatal("❌ Environment variables tidak lengkap, pastikan file .env sudah diisi dengan benar")
 	}
 
-	// ✅ Format DSN (Data Source Name) sesuai kondisi
+	// ✅ Format DSN untuk PostgreSQL di Railway
 	var dsn string
-	if dbPassword == "" {
-		dsn = fmt.Sprintf("host=%s user=%s dbname=%s port=%s sslmode=disable",
-			dbHost, dbUser, dbName, dbPort)
+	if os.Getenv("RAILWAY_DEPLOYMENT") == "true" {
+		// Gunakan SSL saat deploy di Railway
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require",
+			dbHost, dbUser, dbPassword, dbName, dbPort)
 	} else {
+		// Gunakan `sslmode=disable` untuk lokal
 		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 			dbHost, dbUser, dbPassword, dbName, dbPort)
 	}
