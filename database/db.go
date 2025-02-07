@@ -31,22 +31,21 @@ func ConnectDB() {
 		log.Fatal("❌ Environment variables tidak lengkap, pastikan file .env sudah diisi dengan benar")
 	}
 
-	// ✅ Format DSN untuk PostgreSQL di Railway
+	// ✅ Format DSN (Data Source Name)
 	var dsn string
-	if os.Getenv("RAILWAY_DEPLOYMENT") == "true" {
-		// Gunakan SSL saat deploy di Railway
-		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require",
-			dbHost, dbUser, dbPassword, dbName, dbPort)
+	if dbPassword == "" {
+		dsn = fmt.Sprintf("host=%s user=%s dbname=%s port=%s sslmode=disable",
+			dbHost, dbUser, dbName, dbPort)
 	} else {
-		// Gunakan `sslmode=disable` untuk lokal
 		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 			dbHost, dbUser, dbPassword, dbName, dbPort)
 	}
 
 	// ✅ Koneksi ke database
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("❌ Gagal konek ke database:", err)
+	var errDB error
+	DB, errDB = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if errDB != nil {
+		log.Fatal("❌ Gagal konek ke database:", errDB)
 	}
 
 	log.Println("✅ Database connected successfully!")

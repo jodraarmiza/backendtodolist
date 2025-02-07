@@ -18,11 +18,16 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// ✅ CORS Config agar frontend bisa akses backend
+	// ✅ CORS Config (Menambahkan domain Netlify & Railway)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:5173", "http://192.168.1.36:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowOrigins: []string{
+			"http://localhost:5173",                                  // Saat development
+			"http://192.168.1.36:5173",                               // Saat testing di jaringan lokal
+			"https://todolistjotam.netlify.app",                      // Frontend yang sudah dideploy di Netlify
+			"https://backendtodolist-production-e715.up.railway.app", // Backend di Railway
+		},
+		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true,
 	}))
 
@@ -31,16 +36,17 @@ func main() {
 
 	// ✅ Migrasi Database
 	if err := database.DB.AutoMigrate(&models.User{}, &models.Todo{}); err != nil {
-		log.Fatal("Gagal melakukan migrasi database:", err)
+		log.Fatalf("❌ Gagal melakukan migrasi database: %v", err)
 	}
 
 	// ✅ Routes
-	e.POST("/register", auth.Register) // Pastikan ini ada
+	e.POST("/register", auth.Register)
 	e.POST("/login", auth.Login)
 	e.GET("/todos", handlers.GetToDos)
 	e.POST("/todos", handlers.CreateToDo)
 
-	// ✅ Jalankan server
-	log.Println("✅ Server berjalan di: http://192.168.1.36:8080")
-	e.Logger.Fatal(e.Start("0.0.0.0:8080")) // Bisa diakses dari jaringan
+	// ✅ Jalankan server di semua network (localhost & jaringan)
+	serverAddress := "0.0.0.0:8080"
+	log.Printf("✅ Server berjalan di: http://%s", serverAddress)
+	e.Logger.Fatal(e.Start(serverAddress))
 }
