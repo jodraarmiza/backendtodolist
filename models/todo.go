@@ -2,9 +2,9 @@ package models
 
 import "gorm.io/gorm"
 
-// Todo struct untuk tabel todo dalam database
 type Todo struct {
 	gorm.Model
-	Task      string `json:"task"`
+	Text      string `json:"text"`
 	Completed bool   `json:"completed"`
+	UserID    uint   `json:"user_id"` // Pastikan UserID ada untuk relasi
 }
